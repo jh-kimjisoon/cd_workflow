@@ -1,0 +1,57 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.4'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version "6.20.0"
+}
+
+ext.googleJavaFormatVersion = "1.26.0"
+
+group = 'com.jhsolution'
+// commit hash 기반 versioning
+version = {
+	def gitProcess = 'git rev-parse --short HEAD'.execute()
+	gitProcess.waitFor()
+	return gitProcess.text.trim()
+}()
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+tasks.named('build') {
+	dependsOn("spotlessApply")
+}
+
+spotless {
+	java {
+		importOrder()
+		removeUnusedImports()
+		googleJavaFormat("$googleJavaFormatVersion")
+	}
+}
+

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# list of Conventional Commits types
+types=(
+fix feat build chore ci docs perf refactor revert style test
+)
+
+# the commit message file is the only argument
+msg_file="$1"
+
+# join types with | to form regex ORs
+r_types="($(IFS='|'; echo "${types[*]}"))"
+# optional (scope)
+r_scope="(\([[:alnum:] \/-]+\))?"
+# optional breaking change indicator and colon delimiter
+r_delim='!?:'
+# subject line, body, footer
+r_subject=" [[:graph:]].+"
+# the full regex pattern
+pattern="^$r_types$r_scope$r_delim$r_subject$"
+
+# Check if commit is conventional commit
+if grep -Eq "$pattern" "$msg_file"; then
+    exit 0
+fi
+
+if test -t 1 && test -n "$(tput colors)"; then 
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    PURPLE='\033[0;35m'
+    NC='\033[0m'
+fi
+
+echo -e "${RED}ERROR: 유효하지 않은 커밋 메시지지${NC}:
+${PURPLE}$( cat "$msg_file" )${NC}
+"
+echo -e "
+커밋 메시지가 ${PURPLE}커밋 컨벤션 규약${NC}을 ${RED}따르지 않습니다${NC}. 커밋 컨벤션 규약 참고: ${BLUE}https://www.conventionalcommits.org/${NC}
+커밋 컨벤션은 아래의 타입 중 하나로 시작하여야합니다:
+    ${GREEN}$(IFS=' '; echo "${types[*]}")${NC}
+이어서 ${PURPLE}적용 범위${NC}에 대한 내용이(${PURPLE}선택사항${NC}),
+${RED}큰 변화${NC}가 있을 경우에 한해서 ${RED}느낌표${NC}(${RED}!${NC})를 추가하며,
+그 다음에는 콜론(:)이,
+다음에 커밋 메시지가 와야 합니다..
+EX)
+호환성을 해치지 않는 범위의 작은 버그를 고쳤을 때:
+    ${GREEN}fix(module): fix bug #42${NC}
+단순 기능을 추가했을 때:
+    ${GREEN}feat(module): add new API${NC}
+코드에 큰 변화가 있었을 때:
+    ${GREEN}refactor(module)!: remove infinite loop${NC}
+"
+exit 1

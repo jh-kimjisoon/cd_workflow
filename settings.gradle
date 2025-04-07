@@ -1,0 +1,21 @@
+plugins {
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.0.22"
+}
+
+rootProject.name = 'pyeongtaek-smartcity'
+
+gitHooks { extension ->
+    extension.with {
+        commitMsg { context ->
+            context.with {
+                from(file("./scripts/hooks/commit-msg"))
+            }
+        }
+        preCommit { context ->
+            context.with {
+                from(file("./scripts/hooks/pre-commit"))
+            }
+        }
+    }
+    createHooks(true)
+}

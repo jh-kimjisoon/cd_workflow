@@ -1,0 +1,12 @@
+#!/bin/sh
+
+stagedFiles=$(git diff --staged --name-only)
+
+echo "spotlessApply 실행 중... (코드 포맷팅 중)"
+./gradlew spotlessApply --daemon
+
+for file in $stagedFiles; do
+  if test -f "$file"; then
+    git add "$file"
+  fi
+done
