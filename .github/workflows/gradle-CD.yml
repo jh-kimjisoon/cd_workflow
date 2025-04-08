@@ -77,7 +77,7 @@ jobs:
             type=sha
 
       - name: deploy to DEV
-        if: contains(${{ github.ref }}, 'develop')
+        if: contains(github.ref, 'develop')
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEV_HOST }}
